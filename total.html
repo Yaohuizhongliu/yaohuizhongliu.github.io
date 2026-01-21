@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>总席位预测</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Hiragino Kaku Gothic Pro", "Meiryo", sans-serif;
+    background-color: #202020;
+    color: #e0e0e0;
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #404040;
+}
+
+.back-btn {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background-color: #404040;
+    color: #e0e0e0;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.back-btn:hover {
+    background-color: #6090c0;
+}
+
+h1 {
+    margin: 20px 0;
+}
+
+.table-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #404040;
+}
+
+th {
+    background-color: #303030;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+tr:nth-child(even) {
+    background-color: #2a2a2a;
+}
+
+.party-name {
+    text-align: left !important;
+    font-weight: bold;
+}
+
+input[type="number"] {
+    width: 80px;
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #606060;
+    background-color: #303030;
+    color: #e0e0e0;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: #6090c0;
+}
+
+input[type="text"] {
+    padding: 8px 12px;
+    text-align: center;
+    border: 1px solid #606060;
+    background-color: #303030;
+    color: #e0e0e0;
+    border-radius: 4px;
+    font-size: 16px;
+    width: 200px;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #6090c0;
+}
+
+.total-cell {
+    background-color: #404060;
+    font-weight: bold;
+}
+
+.summary {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #303030;
+    border-radius: 10px;
+}
+
+.summary h2 {
+    color: #6090c0;
+    margin-bottom: 15px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #404040;
+}
+
+.summary-value {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #6090c0;
+}
+
+.jimin { color: #E080A0; }
+.ishin { color: #60C080; }
+.chudo { color: #2080C0; }
+.kokumin { color: #80E0E0; }
+.sansei { color: #E08000; }
+.shamin { color: #E0B070; }
+.kyosan { color: #E04040; }
+.reiwa { color: #E0D0A0; }
+.hoshu { color: #8090B0; }
+.genzei { color: #B040D0; }
+.mirai { color: #E09090; }
+.yukoku { color: #C0C0E0; }
+.musho { color: #A08060; }
+
+.reset-btn {
+    margin-top: 20px;
+    padding: 10px 30px;
+    background-color: #604040;
+    color: #e0e0e0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.reset-btn:hover {
+    background-color: #806060;
+}
+
+.submit-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #303030;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.submit-section h2 {
+    color: #6090c0;
+    margin-bottom: 15px;
+}
+
+.submit-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.submit-inputs label {
+    font-size: 14px;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.submit-btn {
+    padding: 12px 30px;
+    background-color: #6090c0;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 15px;
+    transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+    background-color: #80b0d0;
+}
+
+.submissions-container {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #303030;
+    border-radius: 10px;
+}
+
+.submissions-container h2 {
+    color: #6090c0;
+    margin-bottom: 20px;
+}
+
+.submission-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.submission-table th {
+    background-color: #404060;
+    color: #ffffff;
+    padding: 12px;
+    text-align: center;
+}
+
+.submission-table td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #404040;
+}
+
+.submission-table td:first-child {
+    text-align: left;
+    font-weight: bold;
+}
+
+.submission-table tr:hover {
+    background-color: #404040;
+}
+
+.delete-btn {
+    padding: 5px 10px;
+    background-color: #604040;
+    color: #e0e0e0;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+.delete-btn:hover {
+    background-color: #804040;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 30px;
+    color: #808080;
+    font-size: 14px;
+}
+</style>
+</head>
+<body>
+    <div class="header">
+        <a href="main.html" class="back-btn">← 戻る</a>
+        <h1>总席位预测</h1>
+    </div>
+
+    <div class="table-container">
+        <table id="seatsTable">
+            <thead>
+                <tr>
+                    <th>政党</th>
+                    <th>選挙区</th>
+                    <th>比例区</th>
+                    <th class="total-cell">総計</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="party-name jimin">自由民主党</td>
+                    <td><input type="number" class="senkyoku" data-party="jimin" value="0"></td>
+                    <td><input type="number" class="hirei" data-party="jimin" value="0"></td>
+                    <td class="total-cell" id="total-jimin">0</td>
+                </tr>
+                <tr>
+                    <td class="party-name ishin">日本維新の会</td>
+                    <td><input type="number" class="senkyoku" data-party="ishin" value="0"></td>
+                    <td><input type="number" class="hirei" data-party="ishin" value="0"></td>
+                    <td class="total-cell" id="total-ishin">0</td>
+                </tr>
+                <tr>
+                    <td class="party-name chudo">中道改革連合</td>
+                    <td><input type="number" class="senkyoku" data-party="chudo" value="0"></td>
+                    <td><input type="number" class="hirei" data-party="chudo" value="0"></td>
+                    <td class="total-cell" id="total-chudo">0</td>
+                </tr>
+                <tr>
+                    <td class="party-name kokumin">国民民主党</td>
+                    <td><input type="number" class="senkyoku" data-party="kokumin" value="0"></td>
+                    <td><input type="number" class="hirei" data-party="kokumin" value="0"></td>
+                    <td class="total-cell" id="total-kokumin">0</td>
+                </tr>
+                <tr>
+                    <td class="party-name sansei">参政党</td>
+                    <td><input type="number" class="senkyoku" data-party="sansei" value="0"></td>
+                    <td><input type="number" class="hirei" data-party="sansei" value="0"></td>
+                    <td class="total-cell" id="total-sansei">0</td>
+                </tr>
+                <tr>
+                    <td class="party-name shamin">社会民主党</td>
+                    <td><input type="number" class="senkyoku" data-party="shamin" value="0"></td>
+                    <td><input type="number" class="hirei" data-party="shamin" value="0"></td>
+                    <td class="total-cell" id="total-shamin">0</td>
+                </tr>
+                <tr>
+                    <td class="party-name kyosan">日本共産党</td>
+                    <td><input type="number" class="senkyoku" data-party="kyosan" value="0"></td>
+                    <td><input type="number" class="hirei" data-party="kyosan" value="0"></td>
+                    <td class="total-cell" id="total-kyosan">0</td>
+                </tr>
+                <tr>
+                    <td class="party-name reiwa">れいわ新選組</td>
+                    <td><input type="number" class="senkyoku" data-party="reiwa" value="0"></td>
+                    <td><input type="number" class="hirei" data-party="reiwa" value="0"></td>
+                    <td class="total-cell" id="total-reiwa">0</td>
+                </tr>
+                <tr>
+                    <td class="party-name hoshu">日本保守党</td>
+                    <td><input type="number" class="senkyoku" data-party="hoshu" value="0"></td>
+                    <td><input type="number" class="hirei" data-party="hoshu" value="0"></td>
+                    <td class="total-cell" id="total-hoshu">0</td>
+                </tr>
+                <tr>
+                    <td class="party-name genzei">減税日本</td>
+                    <td><input type="number" class="senkyoku" data-party="genzei" value="0"></td>
+                    <td><input type="number" class="hirei" data-party="genzei" value="0"></td>
+                    <td class="total-cell" id="total-genzei">0</td>
+                </tr>
+                <tr>
+                    <td class="party-name mirai">チームみらい</td>
+                    <td><input type="number" class="senkyoku" data-party="mirai" value="0"></td>
+                    <td><input type="number" class="hirei" data-party="mirai" value="0"></td>
+                    <td class="total-cell" id="total-mirai">0</td>
+                </tr>
+                <tr>
+                    <td class="party-name yukoku">ゆうこく連合</td>
+                    <td><input type="number" class="senkyoku" data-party="yukoku" value="0"></td>
+                    <td><input type="number" class="hirei" data-party="yukoku" value="0"></td>
+                    <td class="total-cell" id="total-yukoku">0</td>
+                </tr>
+                <tr>
+                    <td class="party-name musho">無所属等</td>
+                    <td><input type="number" class="senkyoku" data-party="musho" value="0"></td>
+                    <td><input type="number" class="hirei" data-party="musho" value="0"></td>
+                    <td class="total-cell" id="total-musho">0</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td class="party-name">合計</td>
+                    <td id="total-senkyoku-sum">0</td>
+                    <td id="total-hirei-sum">0</td>
+                    <td class="total-cell" id="grand-total">0</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="summary">
+            <h2>サマリー</h2>
+            <div class="summary-row">
+                <span>選挙区席数:</span>
+                <span class="summary-value" id="summary-senkyoku">0</span>
+            </div>
+            <div class="summary-row">
+                <span>比例区席数:</span>
+                <span class="summary-value" id="summary-hirei">0</span>
+            </div>
+            <div class="summary-row">
+                <span>総獲得席数:</span>
+                <span class="summary-value" id="summary-total">0</span>
+            </div>
+            <div class="summary-row">
+                <span>残り席数 (465):</span>
+                <span class="summary-value" id="summary-remaining">465</span>
+            </div>
+        </div>
+
+        <button class="reset-btn" onclick="resetAll()">リセット</button>
+    </div>
+
+    <div class="submit-section">
+        <h2>予想を提出する</h2>
+        <div class="submit-inputs">
+            <div>
+                <label>氏名</label>
+                <input type="text" id="submitterName" placeholder="氏名を入力してください">
+            </div>
+            <button class="submit-btn" onclick="submitPrediction()">提出する</button>
+        </div>
+    </div>
+
+    <div class="submissions-container">
+        <h2>他の人の予想</h2>
+        <div id="submissionsContent"></div>
+    </div>
+
+    <script>
+        // 政党リスト
+        const parties = ['jimin', 'ishin', 'chudo', 'kokumin', 'sansei', 'shamin', 'kyosan', 'reiwa', 'hoshu', 'genzei', 'mirai', 'yukoku', 'musho'];
+        const STORAGE_KEY = 'total_predictions';
+
+        // 入力イベントリスナーを追加
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', calculateTotals);
+        });
+
+        function calculateTotals() {
+            let senkyokuTotal = 0;
+            let hireiTotal = 0;
+            let grandTotal = 0;
+
+            parties.forEach(party => {
+                const senkyoku = parseInt(document.querySelector(`.senkyoku[data-party="${party}"]`).value) || 0;
+                const hirei = parseInt(document.querySelector(`.hirei[data-party="${party}"]`).value) || 0;
+                const total = senkyoku + hirei;
+
+                document.getElementById(`total-${party}`).textContent = total;
+                senkyokuTotal += senkyoku;
+                hireiTotal += hirei;
+                grandTotal += total;
+            });
+
+            document.getElementById('total-senkyoku-sum').textContent = senkyokuTotal;
+            document.getElementById('total-hirei-sum').textContent = hireiTotal;
+            document.getElementById('grand-total').textContent = grandTotal;
+
+            document.getElementById('summary-senkyoku').textContent = senkyokuTotal;
+            document.getElementById('summary-hirei').textContent = hireiTotal;
+            document.getElementById('summary-total').textContent = grandTotal;
+            document.getElementById('summary-remaining').textContent = 465 - grandTotal;
+
+            // 色を変えて注意を促す
+            const remaining = 465 - grandTotal;
+            const remainingEl = document.getElementById('summary-remaining');
+            if (remaining < 0) {
+                remainingEl.style.color = '#E04040';
+            } else if (remaining > 0) {
+                remainingEl.style.color = '#6090c0';
+            } else {
+                remainingEl.style.color = '#60C080';
+            }
+        }
+
+        function resetAll() {
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.value = 0;
+            });
+            document.getElementById('submitterName').value = '';
+            calculateTotals();
+        }
+
+        function submitPrediction() {
+            const name = document.getElementById('submitterName').value.trim();
+            if (!name) {
+                alert('氏名を入力してください');
+                return;
+            }
+
+            // 現在の予想を取得
+            const prediction = {};
+            parties.forEach(party => {
+                const senkyoku = parseInt(document.querySelector(`.senkyoku[data-party="${party}"]`).value) || 0;
+                const hirei = parseInt(document.querySelector(`.hirei[data-party="${party}"]`).value) || 0;
+                prediction[party] = { senkyoku, hirei, total: senkyoku + hirei };
+            });
+            prediction.grandTotal = parseInt(document.getElementById('grand-total').textContent);
+            prediction.senkyokuTotal = parseInt(document.getElementById('total-senkyoku-sum').textContent);
+            prediction.hireiTotal = parseInt(document.getElementById('total-hirei-sum').textContent);
+
+            // localStorageから既存のデータを取得
+            let allPredictions = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+            // 同じ氏名の予想があれば上書き
+            allPredictions[name] = {
+                prediction: prediction,
+                timestamp: new Date().toISOString()
+            };
+
+            // 保存
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(allPredictions));
+
+            alert('予想を保存しました！');
+
+            // 表示を更新
+            displaySubmissions();
+        }
+
+        function displaySubmissions() {
+            const allPredictions = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            const submissionsDiv = document.getElementById('submissionsContent');
+
+            if (Object.keys(allPredictions).length === 0) {
+                submissionsDiv.innerHTML = '<p class="empty-message">まだ予想がありません</p>';
+                return;
+            }
+
+            // タイムスタンプ順にソート
+            const sortedNames = Object.keys(allPredictions).sort((a, b) => {
+                return new Date(allPredictions[b].timestamp) - new Date(allPredictions[a].timestamp);
+            });
+
+            let html = '<table class="submission-table"><thead><tr><th>氏名</th><th>日時</th><th>自民</th><th>維新</th><th>中道</th><th>国民</th><th>参政</th><th>社民</th><th>共産</th><th>れいわ</th><th>保守</th><th>減税</th><th>みらい</th><th>憂国</th><th>無所属</th><th>総計</th></tr></thead><tbody>';
+
+            sortedNames.forEach(name => {
+                const data = allPredictions[name];
+                const prediction = data.prediction;
+                const date = new Date(data.timestamp).toLocaleString('ja-JP');
+                const pred = prediction;
+
+                html += `<tr>
+                    <td>${escapeHtml(name)}</td>
+                    <td>${date}</td>
+                    <td class="jimin">${pred.jimin.total}</td>
+                    <td class="ishin">${pred.ishin.total}</td>
+                    <td class="chudo">${pred.chudo.total}</td>
+                    <td class="kokumin">${pred.kokumin.total}</td>
+                    <td class="sansei">${pred.sansei.total}</td>
+                    <td class="shamin">${pred.shamin.total}</td>
+                    <td class="kyosan">${pred.kyosan.total}</td>
+                    <td class="reiwa">${pred.reiwa.total}</td>
+                    <td class="hoshu">${pred.hoshu.total}</td>
+                    <td class="genzei">${pred.genzei.total}</td>
+                    <td class="mirai">${pred.mirai.total}</td>
+                    <td class="yukoku">${pred.yukoku.total}</td>
+                    <td class="musho">${pred.musho.total}</td>
+                    <td><strong>${pred.grandTotal}</strong></td>
+                    <td><button class="delete-btn" onclick="deleteSubmission('${escapeHtml(name)}')">削除</button></td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            submissionsDiv.innerHTML = html;
+        }
+
+        function deleteSubmission(name) {
+            if (!confirm(`${name} さんの予想を削除しますか？`)) {
+                return;
+            }
+
+            const allPredictions = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            delete allPredictions[name];
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(allPredictions));
+            displaySubmissions();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 初期表示
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateTotals();
+            displaySubmissions();
+        });
+    </script>
+</body>
+</html>
